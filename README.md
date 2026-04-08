@@ -50,3 +50,4 @@ Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
 
 ### UI/UX Design Note
 The prototype is styled specifically for mobile portrait formats. For the optimal viewing experience on a desktop computer, open your browser's Developer Tools (F12), click on the "Toggle Device Toolbar" (Ctrl+Shift+M), and view the screen mapped as a mobile device (e.g., iPhone 12 Pro).
+
