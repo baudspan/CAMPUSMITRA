@@ -1,16 +1,22 @@
-import React, { useState } from 'react';
-import { Check, Clock, UserCheck, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Check, Clock, UserCheck, AlertCircle, Loader2 } from 'lucide-react';
+import { fetchEvents } from '../services/api';
 
 const EventChecklist = () => {
-  const [events, setEvents] = useState([
-    { id: 1, title: 'Opening Keynote', time: '10:00 AM', status: 'completed', type: 'required' },
-    { id: 2, title: 'AI in Sports Tech', time: '11:30 AM', status: 'pending', type: 'optional' },
-    { id: 3, title: 'Networking Lunch', time: '1:00 PM', status: 'pending', type: 'social' },
-    { id: 4, title: 'VR Hardware Lab', time: '3:00 PM', status: 'queued', type: 'workshop', queuePosition: 4, capacityFull: true },
-    { id: 5, title: 'Startup Pitch', time: '4:00 PM', status: 'pending', type: 'workshop', capacityFull: true }
-  ]);
-
+  const [events, setEvents] = useState([]);
   const [notification, setNotification] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    fetchEvents().then(data => {
+      if (mounted) {
+        setEvents(data);
+        setLoading(false);
+      }
+    });
+    return () => { mounted = false; };
+  }, []);
 
   const toggleStatus = (id) => {
     setEvents(events.map(ev => {
@@ -44,6 +50,15 @@ const EventChecklist = () => {
       default: return 'var(--text-secondary)';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="fade-in" style={{ display: 'flex', justifyContent: 'center', padding: '40px' }} role="status">
+        <Loader2 style={{ animation: 'spin 1s linear infinite' }} />
+        <span style={{ marginLeft: '12px' }}>Loading itinerary...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="fade-in">
@@ -100,12 +115,12 @@ const EventChecklist = () => {
               </h4>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Clock size={12} /> {event.time}
+                  <Clock size={12} aria-hidden="true" /> {event.time}
                 </span>
                 
                 {event.status === 'queued' && (
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#f59e0b', fontWeight: 600 }}>
-                    <UserCheck size={12} /> #{event.queuePosition} in Queue
+                    <UserCheck size={12} aria-hidden="true" /> #{event.queuePosition} in Queue
                   </span>
                 )}
                 

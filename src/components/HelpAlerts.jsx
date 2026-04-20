@@ -1,23 +1,60 @@
-import React, { useMemo } from 'react';
-import { Bell, Info, ShieldAlert, Wifi, Navigation } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Bell, Info, ShieldAlert, Wifi, Navigation, Loader2 } from 'lucide-react';
+import PropTypes from 'prop-types';
+import { fetchAlerts } from '../services/api';
+
+const IconMapper = ({ type }) => {
+  if (type === 'wifi') return <Wifi size={20} aria-hidden="true" />;
+  if (type === 'navigation') return <Navigation size={20} aria-hidden="true" />;
+  return <Info size={20} aria-hidden="true" />;
+};
+
+IconMapper.propTypes = {
+  type: PropTypes.string.isRequired
+};
 
 const HelpAlerts = () => {
-  const alerts = useMemo(() => [
-    { id: 1, type: 'urgent', title: 'Schedule Change', message: 'The AI Workshop has been moved from Room 4B to the Main Stage.', time: '2 mins ago' },
-    { id: 2, type: 'info', title: 'Food Court Busy', message: 'Current wait times at the main food court exceed 20 mins. Use pre-order to save time!', time: '15 mins ago' }
-  ], []);
+  const [data, setData] = useState({ alerts: [], faqs: [] });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const faqs = useMemo(() => [
-    { id: 1, icon: <Wifi size={20} aria-hidden="true" />, q: 'Campus WiFi', a: 'Network: CampusSync_Guest | Pass: events2026' },
-    { id: 2, icon: <Navigation size={20} aria-hidden="true" />, q: 'Lost & Found', a: 'Located at the North Entrance Information Desk.' }
-  ], []);
+  useEffect(() => {
+    let mounted = true;
+    const loadData = async () => {
+      try {
+        const result = await fetchAlerts();
+        if (mounted) {
+          setData(result);
+          setLoading(false);
+        }
+      } catch (err) {
+        if (mounted) {
+          setError(err.message);
+          setLoading(false);
+        }
+      }
+    };
+    loadData();
+    return () => { mounted = false; };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="fade-in" style={{ display: 'flex', justifyContent: 'center', padding: '40px' }} role="status">
+        <Loader2 className="pulse-dot" style={{ background: 'transparent', animation: 'spin 1s linear infinite' }} />
+        <span style={{ marginLeft: '12px' }}>Loading live alerts...</span>
+      </div>
+    );
+  }
+
+  if (error) throw new Error(error);
 
   return (
     <div className="fade-in">
       <h2 style={{ marginBottom: '20px' }}>Live Updates</h2>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
-        {alerts.map(alert => (
+        {data.alerts.map(alert => (
           <div key={alert.id} className="card" style={{ 
             borderLeft: `4px solid ${alert.type === 'urgent' ? '#ef4444' : 'var(--primary-color)'}`,
             padding: '16px',
@@ -37,10 +74,10 @@ const HelpAlerts = () => {
       <h3 style={{ marginBottom: '16px' }}>Quick Help</h3>
       
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px', marginBottom: '24px' }}>
-        {faqs.map(faq => (
+        {data.faqs.map(faq => (
           <div key={faq.id} className="glass-panel" style={{ padding: '16px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-            <div style={{ color: 'var(--primary-color)', background: 'var(--accent-color)', padding: '8px', borderRadius: '50%' }}>
-              {faq.icon}
+            <div style={{ color: 'var(--primary-color)', background: 'var(--accent-color)', padding: '8px', borderRadius: '50%', display: 'flex' }}>
+              <IconMapper type={faq.iconType} />
             </div>
             <div>
               <h5 style={{ margin: '0 0 4px 0' }}>{faq.q}</h5>

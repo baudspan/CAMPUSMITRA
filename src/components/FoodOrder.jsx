@@ -1,18 +1,73 @@
-import React, { useState, useMemo } from 'react';
-import { ShoppingBag, Coffee, Plus, Clock } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ShoppingBag, Coffee, Plus, Clock, Loader2 } from 'lucide-react';
+import PropTypes from 'prop-types';
+import { fetchFoodMenu } from '../services/api';
+
+const MenuItem = ({ item, onAdd }) => (
+  <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ fontSize: '2rem', background: 'var(--bg-color)', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--border-radius-sm)' }}>
+        {item.image}
+      </div>
+      <div>
+        <h4 style={{ margin: 0 }}>{item.name}</h4>
+        <p style={{ margin: 0, fontWeight: 600, color: 'var(--primary-color)' }}>{item.price}</p>
+      </div>
+    </div>
+    <button
+      className="btn-icon"
+      style={{ width: '36px', height: '36px' }}
+      onClick={() => onAdd(item.id)}
+      aria-label={`Add ${item.name} to cart`}
+    >
+      <Plus size={16} aria-hidden="true" />
+    </button>
+  </div>
+);
+
+MenuItem.propTypes = {
+  item: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+    price: PropTypes.string.isRequired,
+    image: PropTypes.string.isRequired,
+  }).isRequired,
+  onAdd: PropTypes.func.isRequired
+};
 
 const FoodOrder = () => {
   const [cartCount, setCartCount] = useState(0);
   const [selectedSlot, setSelectedSlot] = useState('');
   const [ordered, setOrdered] = useState(false);
-
-  const menuItems = useMemo(() => [
-    { id: 1, name: 'Artisan Coffee', price: '150 RS', image: '☕' },
-    { id: 2, name: 'Avocado Toast', price: '250 RS', image: '🍞' },
-    { id: 3, name: 'Energy Smoothie', price: '200 RS', image: '🥤' }
-  ], []);
+  
+  const [menuItems, setMenuItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const timeSlots = useMemo(() => ['1:00 PM', '1:15 PM', '1:30 PM', '1:45 PM'], []);
+
+  useEffect(() => {
+    let mounted = true;
+    fetchFoodMenu().then(data => {
+      if (mounted) {
+        setMenuItems(data);
+        setLoading(false);
+      }
+    });
+    return () => { mounted = false; };
+  }, []);
+
+  const handleAddToCart = () => {
+    setCartCount(prev => prev + 1);
+  };
+
+  if (loading) {
+    return (
+      <div className="fade-in" style={{ display: 'flex', justifyContent: 'center', padding: '40px' }} role="status">
+        <Loader2 style={{ animation: 'spin 1s linear infinite' }} />
+        <span style={{ marginLeft: '12px' }}>Loading menu...</span>
+      </div>
+    );
+  }
 
   if (ordered) {
     return (
@@ -45,25 +100,7 @@ const FoodOrder = () => {
 
       <div style={{ marginBottom: '24px' }}>
         {menuItems.map(item => (
-          <div key={item.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ fontSize: '2rem', background: 'var(--bg-color)', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--border-radius-sm)' }}>
-                {item.image}
-              </div>
-              <div>
-                <h4 style={{ margin: 0 }}>{item.name}</h4>
-                <p style={{ margin: 0, fontWeight: 600, color: 'var(--primary-color)' }}>{item.price}</p>
-              </div>
-            </div>
-            <button
-              className="btn-icon"
-              style={{ width: '36px', height: '36px' }}
-              onClick={() => setCartCount(c => c + 1)}
-              aria-label={`Add ${item.name} to cart`}
-            >
-              <Plus size={16} aria-hidden="true" />
-            </button>
-          </div>
+          <MenuItem key={item.id} item={item} onAdd={handleAddToCart} />
         ))}
       </div>
 

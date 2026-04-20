@@ -1,5 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { Routes, Route, NavLink, useNavigate } from 'react-router-dom';
 import { Map, ListTodo, Coffee, Bell, Menu, X, Home, Info, Phone } from 'lucide-react';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const MapNavigation = lazy(() => import('./components/MapNavigation'));
 const EventChecklist = lazy(() => import('./components/EventChecklist'));
@@ -7,9 +9,9 @@ const FoodOrder = lazy(() => import('./components/FoodOrder'));
 const HelpAlerts = lazy(() => import('./components/HelpAlerts'));
 
 function App() {
-  const [activeTab, setActiveTab] = useState('map');
   const [showSplash, setShowSplash] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Hide splash screen after 3.5 seconds
@@ -18,16 +20,6 @@ function App() {
     }, 3500);
     return () => clearTimeout(timer);
   }, []);
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'map': return <MapNavigation />;
-      case 'events': return <EventChecklist />;
-      case 'food': return <FoodOrder />;
-      case 'help': return <HelpAlerts />;
-      default: return <MapNavigation />;
-    }
-  };
 
   if (showSplash) {
     return (
@@ -70,7 +62,7 @@ function App() {
               </button>
             </div>
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <button className="menu-link" onClick={() => { setMenuOpen(false); setActiveTab('map'); }}>
+              <button className="menu-link" onClick={() => { setMenuOpen(false); navigate('/'); }}>
                 <Home size={20} aria-hidden="true" /> <span>Home</span>
               </button>
               <button className="menu-link" onClick={() => setMenuOpen(false)}>
@@ -85,48 +77,36 @@ function App() {
       )}
 
       <main className="main-content" role="main">
-        <Suspense fallback={<div style={{ textAlign: 'center', padding: '2rem' }} role="status">Loading...</div>}>
-          {renderContent()}
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<div style={{ textAlign: 'center', padding: '2rem' }} role="status">Loading modules...</div>}>
+            <Routes>
+              <Route path="/" element={<MapNavigation />} />
+              <Route path="/events" element={<EventChecklist />} />
+              <Route path="/food" element={<FoodOrder />} />
+              <Route path="/help" element={<HelpAlerts />} />
+              <Route path="*" element={<MapNavigation />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </main>
 
       <nav className="bottom-nav" role="navigation" aria-label="Bottom Navigation">
-        <button 
-          className={`nav-item ${activeTab === 'map' ? 'active' : ''}`}
-          onClick={() => setActiveTab('map')}
-          aria-current={activeTab === 'map' ? 'page' : undefined}
-          aria-label="Navigate to Map"
-        >
+        <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} aria-label="Navigate to Map">
           <Map aria-hidden="true" />
           <span>Map</span>
-        </button>
-        <button 
-          className={`nav-item ${activeTab === 'events' ? 'active' : ''}`}
-          onClick={() => setActiveTab('events')}
-          aria-current={activeTab === 'events' ? 'page' : undefined}
-          aria-label="Navigate to Itinerary"
-        >
+        </NavLink>
+        <NavLink to="/events" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} aria-label="Navigate to Itinerary">
           <ListTodo aria-hidden="true" />
           <span>Itinerary</span>
-        </button>
-        <button 
-          className={`nav-item ${activeTab === 'food' ? 'active' : ''}`}
-          onClick={() => setActiveTab('food')}
-          aria-current={activeTab === 'food' ? 'page' : undefined}
-          aria-label="Navigate to Food Pre-order"
-        >
+        </NavLink>
+        <NavLink to="/food" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} aria-label="Navigate to Food Pre-order">
           <Coffee aria-hidden="true" />
           <span>Food</span>
-        </button>
-        <button 
-          className={`nav-item ${activeTab === 'help' ? 'active' : ''}`}
-          onClick={() => setActiveTab('help')}
-          aria-current={activeTab === 'help' ? 'page' : undefined}
-          aria-label="Navigate to Live Alerts"
-        >
+        </NavLink>
+        <NavLink to="/help" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} aria-label="Navigate to Live Alerts">
           <Bell aria-hidden="true" />
           <span>Alerts</span>
-        </button>
+        </NavLink>
       </nav>
     </>
   );
