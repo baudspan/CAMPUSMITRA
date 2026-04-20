@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ShoppingBag, Coffee, Plus, Clock } from 'lucide-react';
 
 const FoodOrder = () => {
@@ -6,13 +6,13 @@ const FoodOrder = () => {
   const [selectedSlot, setSelectedSlot] = useState('');
   const [ordered, setOrdered] = useState(false);
 
-  const menuItems = [
-    { id: 1, name: 'Artisan Coffee', price: '$4.50', image: '☕' },
-    { id: 2, name: 'Avocado Toast', price: '$8.00', image: '🍞' },
-    { id: 3, name: 'Energy Smoothie', price: '$6.50', image: '🥤' }
-  ];
+  const menuItems = useMemo(() => [
+    { id: 1, name: 'Artisan Coffee', price: '150 RS', image: '☕' },
+    { id: 2, name: 'Avocado Toast', price: '250 RS', image: '🍞' },
+    { id: 3, name: 'Energy Smoothie', price: '200 RS', image: '🥤' }
+  ], []);
 
-  const timeSlots = ['1:00 PM', '1:15 PM', '1:30 PM', '1:45 PM'];
+  const timeSlots = useMemo(() => ['1:00 PM', '1:15 PM', '1:30 PM', '1:45 PM'], []);
 
   if (ordered) {
     return (
@@ -22,8 +22,8 @@ const FoodOrder = () => {
         </div>
         <h3>Order Confirmed!</h3>
         <p style={{ marginTop: '8px' }}>Your items will be ready for pickup at <strong>{selectedSlot}</strong> at the Central Food Court.</p>
-        <button 
-          className="btn-primary" 
+        <button
+          className="btn-primary"
           style={{ marginTop: '24px' }}
           onClick={() => { setOrdered(false); setCartCount(0); setSelectedSlot(''); }}
         >
@@ -55,12 +55,13 @@ const FoodOrder = () => {
                 <p style={{ margin: 0, fontWeight: 600, color: 'var(--primary-color)' }}>{item.price}</p>
               </div>
             </div>
-            <button 
-              className="btn-icon" 
+            <button
+              className="btn-icon"
               style={{ width: '36px', height: '36px' }}
               onClick={() => setCartCount(c => c + 1)}
+              aria-label={`Add ${item.name} to cart`}
             >
-              <Plus size={16} />
+              <Plus size={16} aria-hidden="true" />
             </button>
           </div>
         ))}
@@ -73,12 +74,12 @@ const FoodOrder = () => {
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px' }}>
             {timeSlots.map(slot => (
-              <button 
+              <button
                 key={slot}
                 onClick={() => setSelectedSlot(slot)}
-                style={{ 
-                  padding: '12px', 
-                  borderRadius: 'var(--border-radius-sm)', 
+                style={{
+                  padding: '12px',
+                  borderRadius: 'var(--border-radius-sm)',
                   border: `1px solid ${selectedSlot === slot ? 'var(--primary-color)' : 'var(--border-color)'}`,
                   background: selectedSlot === slot ? 'rgba(139, 92, 246, 0.1)' : 'transparent',
                   color: selectedSlot === slot ? 'var(--primary-color)' : 'var(--text-primary)',
@@ -90,9 +91,9 @@ const FoodOrder = () => {
               </button>
             ))}
           </div>
-          
-          <button 
-            className="btn-primary" 
+
+          <button
+            className="btn-primary"
             style={{ width: '100%' }}
             disabled={!selectedSlot}
             onClick={() => setOrdered(true)}

@@ -6,7 +6,8 @@ const EventChecklist = () => {
     { id: 1, title: 'Opening Keynote', time: '10:00 AM', status: 'completed', type: 'required' },
     { id: 2, title: 'AI in Sports Tech', time: '11:30 AM', status: 'pending', type: 'optional' },
     { id: 3, title: 'Networking Lunch', time: '1:00 PM', status: 'pending', type: 'social' },
-    { id: 4, title: 'VR Hardware Lab', time: '3:00 PM', status: 'queued', type: 'workshop', queuePosition: 4, capacityFull: true }
+    { id: 4, title: 'VR Hardware Lab', time: '3:00 PM', status: 'queued', type: 'workshop', queuePosition: 4, capacityFull: true },
+    { id: 5, title: 'Startup Pitch', time: '4:00 PM', status: 'pending', type: 'workshop', capacityFull: true }
   ]);
 
   const [notification, setNotification] = useState(null);
@@ -75,6 +76,8 @@ const EventChecklist = () => {
           <div key={event.id} className="card" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '0' }}>
             <button 
               onClick={() => toggleStatus(event.id)}
+              aria-label={`Toggle status for ${event.title}`}
+              aria-pressed={event.status === 'completed'}
               style={{
                 width: '28px',
                 height: '28px',
@@ -116,6 +119,7 @@ const EventChecklist = () => {
               <button 
                 style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '6px 12px', borderRadius: 'var(--border-radius-pill)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
                 onClick={() => setEvents(events.map(e => e.id === event.id ? {...e, status: 'queued'} : e))}
+                aria-label={`Join virtual queue for ${event.title}`}
               >
                 Join Queue
               </button>

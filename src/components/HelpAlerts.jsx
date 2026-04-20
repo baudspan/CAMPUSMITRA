@@ -1,16 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Bell, Info, ShieldAlert, Wifi, Navigation } from 'lucide-react';
 
 const HelpAlerts = () => {
-  const alerts = [
+  const alerts = useMemo(() => [
     { id: 1, type: 'urgent', title: 'Schedule Change', message: 'The AI Workshop has been moved from Room 4B to the Main Stage.', time: '2 mins ago' },
     { id: 2, type: 'info', title: 'Food Court Busy', message: 'Current wait times at the main food court exceed 20 mins. Use pre-order to save time!', time: '15 mins ago' }
-  ];
+  ], []);
 
-  const faqs = [
-    { id: 1, icon: <Wifi size={20} />, q: 'Campus WiFi', a: 'Network: CampusSync_Guest | Pass: events2026' },
-    { id: 2, icon: <Navigation size={20} />, q: 'Lost & Found', a: 'Located at the North Entrance Information Desk.' }
-  ];
+  const faqs = useMemo(() => [
+    { id: 1, icon: <Wifi size={20} aria-hidden="true" />, q: 'Campus WiFi', a: 'Network: CampusSync_Guest | Pass: events2026' },
+    { id: 2, icon: <Navigation size={20} aria-hidden="true" />, q: 'Lost & Found', a: 'Located at the North Entrance Information Desk.' }
+  ], []);
 
   return (
     <div className="fade-in">
@@ -53,8 +53,9 @@ const HelpAlerts = () => {
       <button 
         className="btn-primary" 
         style={{ width: '100%', background: '#ef4444', boxShadow: '0 4px 14px rgba(239, 68, 68, 0.3)' }}
+        aria-label="Call for Emergency Assistance"
       >
-        <ShieldAlert size={20} />
+        <ShieldAlert size={20} aria-hidden="true" />
         <span>Emergency Assistance</span>
       </button>
     </div>
